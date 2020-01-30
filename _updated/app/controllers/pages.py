@@ -1,7 +1,7 @@
 from flask import render_template, Blueprint, request
 from app.forms import *
 
-blueprint = Blueprint('pages', __name__)
+blueprint = Blueprint("pages", __name__)
 
 
 ################
@@ -9,29 +9,29 @@ blueprint = Blueprint('pages', __name__)
 ################
 
 
-@blueprint.route('/')
+@blueprint.route("/")
 def home():
-    return render_template('pages/placeholder.home.html')
+    return render_template("pages/home_template.html")
 
 
-@blueprint.route('/about')
+@blueprint.route("/about")
 def about():
-    return render_template('pages/placeholder.about.html')
+    return render_template("pages/about_template.html")
 
 
-@blueprint.route('/login')
+@blueprint.route("/login")
 def login():
     form = LoginForm(request.form)
-    return render_template('forms/login.html', form=form)
+    return render_template("forms/login.html", form=form)
 
 
-@blueprint.route('/register')
+@blueprint.route("/register")
 def register():
     form = RegisterForm(request.form)
-    return render_template('forms/register.html', form=form)
+    return render_template("forms/register.html", form=form)
 
 
-@blueprint.route('/forgot')
+@blueprint.route("/forgot")
 def forgot():
     form = ForgotForm(request.form)
-    return render_template('forms/forgot.html', form=form)
+    return render_template("forms/forgot.html", form=form)
