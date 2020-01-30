@@ -1,9 +1,19 @@
-# Quickstart
+## Flask Boilerpate - updated!
 
+Starter App, powered by Real Python
+
+### Quick Start
+
+Clone the repo, then:
+
+```sh
+$ git remote rm origin
+$ git remote add origin <the location of my new git repository>
+$ git push -u origin master
 ```
-conda create -n flask-boilerplate python=3.7
-conda activate flask-boilerplate
-pip install -r requirements.txt
-python app.py
-curl http://localhost:5000
+
+## Run
+
+```sh
+$ make server
 ```
