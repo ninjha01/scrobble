@@ -1,0 +1,12 @@
+runtime: python37
+
+handlers:
+  - url: /static
+    static_dir: webapp/static
+  - url: /.*
+    script: auto
+
+env_variables:
+  GCS_ROOT_PATH: "gs://flask-template/flask-template-uploads"
+  SECRET_KEY: "1hafs;dkljfads;ojsadffa78733314yashldfiff66zxvbj352sd0014--0423829yv.zxv.4GASD1234SDF231"
+

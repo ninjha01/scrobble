@@ -8,6 +8,3 @@ handlers:
 
 env_variables:
   GCS_ROOT_PATH: "gs://flask-template/uploads"
-
-includes:
-  - secrets.yaml
