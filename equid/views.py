@@ -1,5 +1,5 @@
 from flask import render_template, Blueprint, request
-from app.forms import LoginForm, RegisterForm, ForgotForm
+from .forms import LoginForm, RegisterForm, ForgotForm
 
 blueprint = Blueprint("pages", __name__)
 
