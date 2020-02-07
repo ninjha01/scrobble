@@ -60,3 +60,4 @@ virtualenv==16.7.9
 Werkzeug==0.15.5
 WTForms==2.2.1
 zipp==2.1.0
+google-python-cloud-debugger

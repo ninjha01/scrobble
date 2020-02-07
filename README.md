@@ -3,7 +3,7 @@
 ### Quick Start
 
 ```
-conda create -n flask-template python=3.7
+conda create -n flask-template python=3.6
 source activate flask-template
 pip install -r webapp/requirements.txt
 cd webapp
