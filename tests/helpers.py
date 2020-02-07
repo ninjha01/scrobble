@@ -1,7 +1,7 @@
 import json
 import unittest
 
-from app import create_app
+from webapp.app import create_app
 
 
 class TestClient(object):
@@ -38,7 +38,7 @@ class TestClient(object):
 
 class TestCase(unittest.TestCase):
     def setUp(self):
-        self.app = create_app("config")
+        self.app = create_app()
         self.ctx = self.app.app_context()
         self.ctx.push()
         self.client = TestClient(self.app)
