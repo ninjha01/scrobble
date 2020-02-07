@@ -17,7 +17,7 @@ config = {
     "GOOGLE_CLIENT_ID": secrets["GOOGLE_CLIENT_ID"],
     "GOOGLE_CLIENT_SECRET": secrets["GOOGLE_CLIENT_SECRET"],
     "GCS_ROOT_PATH": os.environ["GCS_ROOT_PATH"],
-    "DATASTORE_PROJECT": "equid",
+    "DATASTORE_PROJECT": "flask-boilerplate",
     "GCP_CREDENTIALS": credentials,
     "GCP_CREDENTIALS_2": credentials2,
     "SECRET_KEY": secrets["SECRET_KEY"],
