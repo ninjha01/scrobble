@@ -1,7 +1,7 @@
 import json
 import unittest
 
-from webapp.app import create_app
+from flask_template.webapp.app import create_app
 
 
 class TestClient(object):
