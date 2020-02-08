@@ -1,11 +1,16 @@
 import os
 import yaml
 
-from webapp.app import create_app
+try:
+    from webapp.app import create_app
+except (ModuleNotFoundError, ImportError) as e:
+    from equid.webapp.app import create_app
 
-config = {
-    "SECRET_KEY": os.environ["SECRET_KEY"],
-}
+
+with open("./secret.yaml") as f:
+    secrets = yaml.load(f, Loader=yaml.SafeLoader)["env_variables"]
+
+config = {"SECRET_KEY": secrets["SECRET_KEY"]}
 
 
 if os.environ.get("DEV_OVERRIDE_USER"):
