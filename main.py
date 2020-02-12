@@ -4,7 +4,7 @@ import yaml
 try:
     from webapp.app import create_app
 except (ModuleNotFoundError, ImportError) as e:
-    from equid.webapp.app import create_app
+    from .webapp.app import create_app
 
 
 with open("./secret.yaml") as f:
