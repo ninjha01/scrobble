@@ -28,3 +28,18 @@ def solve_word(word):
         for w in words.keys():
             word_length_dict[w.lower()] = int(length)
     return word_length_dict
+
+
+@blueprint.route("/user/create", methods=["POST"])
+def create_user():
+    pass
+
+
+@blueprint.route("/session/create", methods=["POST"])
+def create_session():
+    pass
+
+
+@blueprint.route("/session/create", methods=["POST"])
+def create_round():
+    pass

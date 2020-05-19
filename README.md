@@ -1,5 +1,21 @@
 ## scrobble
 
+### Workflow
+
+create session
+create rounds
+create user
+for users: join session as user
+
+for rounds:
+send string to users
+while timer:
+log user responses
+calculate scores
+update leaderboard
+send leaderboard to users
+
+
 ### Quick Start Server
 
 ```

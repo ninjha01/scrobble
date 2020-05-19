@@ -25,3 +25,4 @@ class Session:
     id: str
     user_ids: List[str]
     round_ids: List[str]
+    current_round: str
