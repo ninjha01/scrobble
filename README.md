@@ -1,10 +1,11 @@
-## flask-template
+## scrobble
 
-### Quick Start
+### Quick Start Server
 
 ```
-conda create -n flask-template python=3.6
-source activate flask-template
+cd server
+conda create -n scrobble python=3.6
+source activate scrobble
 pip install -r webapp/requirements.txt
 cd webapp
 flask run
@@ -12,12 +13,6 @@ flask run
 
 ### Local Dev
 ```
-cd webapp
-./start.sh
-```
-
-### Deploy
-```
-cd webapp
-./deploy.sh
+cd server/webapp
+./flask run
 ```
