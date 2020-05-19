@@ -1,12 +1,15 @@
 from flask import Flask
 from .views import blueprint as views
+from .api import blueprint as api_blueprint
 from flask_humanize import Humanize
-import uuid
+import logging
 
 
 def create_app(config={}):
     app = Flask(__name__, instance_relative_config=True)
     app.config.update(config)
     app.register_blueprint(views)
+    app.register_blueprint(api_blueprint)
     Humanize(app)
+    app.logger.setLevel(logging.INFO)
     return app
