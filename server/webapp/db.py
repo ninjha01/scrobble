@@ -1,7 +1,6 @@
 import os
 import shelve
 from typing import Dict, List, Optional, Set, Tuple
-from models import User, Round, Session
 
 
 class DB:
@@ -21,22 +20,26 @@ class DB:
     def round_data_filename(self):
         return os.path.join(self.dir, "round-" + self.filename_suffix)
 
-    def get_session(self, session_id: str) -> Session:
+    def get_session(self, session_id: str):
         with shelve.open(self.session_data_filename) as d:
-            return d.get(session_id)
+            return d.get(session_id, None)
 
-    def store_session(self, session: Session):
+    def store_session(self, session):
         with shelve.open(self.session_data_filename) as d:
             d[session.id] = session
 
-    def get_user(self, user_id: str) -> User:
+    def get_user(self, user_id: str):
         with shelve.open(self.user_data_filename) as d:
-            return d.get(user_id)
+            return d.get(user_id, None)
 
-    def get_round(self, round_id: str) -> Round:
+    def store_user(self, user):
+        with shelve.open(self.user_data_filename) as d:
+            d[user.id] = user
+
+    def get_round(self, round_id: str):
         with shelve.open(self.round_data_filename) as d:
-            return d.get(round_id)
+            return d.get(round, None)
 
-    def store_round(self, round: Round):
+    def store_round(self, round):
         with shelve.open(self.round_data_filename) as d:
             d[round.id] = round

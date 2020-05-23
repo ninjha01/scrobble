@@ -7,6 +7,7 @@ import logging
 
 def create_app(config={}):
     app = Flask(__name__, instance_relative_config=True)
+    app.secret_key = "super secret key"
     app.config.update(config)
     app.register_blueprint(views)
     app.register_blueprint(api_blueprint)

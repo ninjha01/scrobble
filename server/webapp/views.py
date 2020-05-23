@@ -1,7 +1,23 @@
-from flask import render_template, Blueprint, request
+from flask import (
+    render_template,
+    Blueprint,
+    request,
+    redirect,
+    flash,
+    url_for,
+    get_flashed_messages,
+)
 from .forms import LoginForm, RegisterForm, ForgotForm
+from .models import (
+    does_user_exist,
+    create_user as _create_user,
+    get_user,
+    does_session_exist,
+    create_session as _create_session,
+    get_session,
+)
 
-blueprint = Blueprint("pages", __name__)
+blueprint = Blueprint("views", __name__)
 
 
 ################
@@ -17,3 +33,26 @@ def home():
 @blueprint.route("/about")
 def about():
     return render_template("pages/about_template.html")
+
+
+@blueprint.route("/session/view/<session_id>", methods=["GET", "POST"])
+def view_session(session_id):
+    user_id = request.form.get("user_id", None)
+    if not does_session_exist(session_id):
+        print(f"No user_id provided.")
+        return redirect(url_for("views.home"))
+
+    if not does_user_exist(user_id):
+        user = _create_user(user_id)
+    else:
+        user = get_user(user_id)
+
+    if not does_session_exist(session_id):
+        print(f"Invalid session id: {session_id}.")
+        flash(f"Invalid session id: {session_id}.")
+        return redirect(url_for("views.home"))
+    else:
+        session = get_session(session_id)
+        return render_template(
+            "pages/session_template.html", user_id=user.id, session_id=session.id
+        )

@@ -9,6 +9,15 @@ from flask import (
     jsonify,
     current_app,
 )
+from .models import (
+    does_user_exist,
+    create_user as _create_user,
+    get_user,
+    does_session_exist,
+    create_session as _create_session,
+    get_session,
+)
+
 
 blueprint = Blueprint("api", __name__)
 
@@ -37,7 +46,30 @@ def create_user():
 
 @blueprint.route("/session/create", methods=["POST"])
 def create_session():
-    pass
+    req = request.get_json(force=True)
+
+    if "session_id" not in req:
+        return jsonify({"success": False, "error": "A session id must be provided."})
+    session_id = req["session_id"]
+
+    if does_session_exist(session_id):
+        return jsonify({"success": False, "error": "Session already exists."})
+
+    # user_id = req["user_id"]
+
+    # if not does_user_exist(user_id):
+    #     user = _create_user(user_id)
+    # else:
+    #     user = get_user(user_id)
+
+    num_rounds = req["num_rounds"]
+    session = _create_session(session_id=session_id, num_rounds=num_rounds)
+    return jsonify(
+        {
+            "success": True,
+            "session_url": url_for("views.view_session", session_id=session.id),
+        }
+    )
 
 
 @blueprint.route("/session/create", methods=["POST"])

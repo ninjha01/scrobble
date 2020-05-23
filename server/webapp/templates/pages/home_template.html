@@ -1,9 +1,98 @@
 {% extends 'layouts/main.html' %}
 {% block title %}Home{% endblock %}
 {% block content %}
+  <script>
+   function createSession() {
+     let url = "{{ url_for("api.create_session") }}"
+     /* let starting_user = $("#user-payload").val()
+      * let session_id = $("#create-session-id-payload").val()
+      * let num_rounds = $("#create-session-rounds-payload").val() */
 
-<div class="page-header">
-  <h1>Scrobble</h1>
-</div>
+     let starting_user = "test_user" 
+     let session_id = "test_session"
+     let num_rounds = 1
+     
+     let payload = {
+       session_id: session_id,
+       starting_user: starting_user,
+       num_rounds: num_rounds,
+     }
+     fetch(url, {
+       credentials: "include",
+       method: "post",
+       body: JSON.stringify(payload)
+     }).then((response) => response.json()).then((data) => {
+       if (data.success === true) {
+	 alert("Successfully created session: " + session_id + ".")
+	 joinSession();
+       }
+       else {
+	 alert(data.error)
+       }
+     }).catch((error) => {
+       console.log(error)
+       alert("There was an internal error")
+     })
+   }
+   
+   
+   function joinSession() {
+     /* let user = $("#user-payload").val()
+      * let session_id = $("#join-session-id-payload").val()
+      *  */
+     let user = "test_user"
+     let session_id = "test_session"
+
+     let url = "{{ url_for("views.view_session", session_id="") }}" + session_id
+     let payload = {
+       user_id: user,
+     }
+     // jquery extend redirect with post datafunction
+     $.extend(
+       {
+	 redirectPost: function(location, args)
+	 {
+           var form = '';
+           $.each( args, function( key, value ) {
+             form += '<input type="hidden" name="'+key+'" value="'+value+'">';
+           });
+           $('<form action="'+location+'" method="POST">'+form+'</form>').appendTo('body').submit();
+	 }
+     });
+     $.redirectPost(url, payload)
+   }
+  </script>
+  
+  <div class="page-header">
+    <h1>Play Scrobble!</h1>
+    <h3> 1. Pick a username </h3>
+    <ul>
+      <li>
+    	<input id="user-payload" style="text" placeholder="Username">
+      </li>
+    </ul>
+    <h3> 2. Create or join a session </h3>
+    <h4> Join </h4>
+    <ul>
+      <li>
+	<input id="join-session-id-payload" style="text" placeholder="Session name">
+      </li>
+      <li>
+	<button type="button" onClick="joinSession()">Join</button>
+      </li>
+    </ul>
+    <h4> Create </h4>
+    <ul>
+      <li>
+	<input id="create-session-id-payload" style="text" placeholder="Session name">
+      </li>
+      <li>
+	<input id="create-session-rounds-payload" type="number" placeholder="Number of Rounds">
+      </li>
+      <li>
+	<button type="button" onClick="createSession()">Create</button>
+      </li>
+    </ul>
+  </div>
 
 {% endblock %}

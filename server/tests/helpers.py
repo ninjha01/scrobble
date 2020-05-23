@@ -1,7 +1,7 @@
 import json
 import unittest
 
-from webapp.app import create_app
+from ..webapp.app import create_app
 
 
 class TestClient(object):
