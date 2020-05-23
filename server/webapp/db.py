@@ -38,7 +38,7 @@ class DB:
 
     def get_round(self, round_id: str):
         with shelve.open(self.round_data_filename) as d:
-            return d.get(round, None)
+            return d.get(round_id, None)
 
     def store_round(self, round):
         with shelve.open(self.round_data_filename) as d:
