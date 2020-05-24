@@ -5,7 +5,6 @@ from flask_humanize import Humanize
 from flask_login import LoginManager
 
 from .api import blueprint as api_blueprint
-from .auth import init_app as auth_init_app
 from .views import blueprint as views
 
 
