@@ -4,12 +4,13 @@ from dataclasses import dataclass
 from typing import List, Tuple, Dict
 from .db import DB
 from .utils import gen_round_str, pull_score_dict
+from flask_login import UserMixin
 
 db = DB()
 
 
 @dataclass
-class User:
+class User(UserMixin):
     id: str
 
 
@@ -52,13 +53,6 @@ class RoundDoesNotExist(Exception):
     pass
 
 
-def submit_word_to_round(user_id: str, submission: str, round_id: str):
-    u = get_user(user_id)
-    r = get_round(round_id)
-    r.user_words[u.id].append(submission)
-    db.store_round(r)
-
-
 def does_round_exist(round_id: str) -> bool:
     return not db.get_round(round_id) is None
 
@@ -90,6 +84,7 @@ def add_user_word_to_round(round_id: str, user_id: str, word: str):
     r = get_round(round_id)
     u = get_user(user_id)
     r.user_words[u.id].append(word)
+    db.store_round(r)
 
 
 def get_round(round_id: str):
@@ -119,6 +114,8 @@ class SessionDoesNotExist(Exception):
 
 
 def does_session_exist(session_id: str) -> bool:
+    if len(session_id) == 0:
+        return False
     return not db.get_session(session_id) is None
 
 

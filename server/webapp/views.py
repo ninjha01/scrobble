@@ -7,6 +7,7 @@ from flask import (
     url_for,
     get_flashed_messages,
 )
+from flask_login import login_required
 from .forms import LoginForm, RegisterForm, ForgotForm
 from .models import (
     does_user_exist,
@@ -38,15 +39,15 @@ def about():
 @blueprint.route("/session/view/<session_id>", methods=["GET", "POST"])
 def view_session(session_id):
     user_id = request.form.get("user_id", None)
-    if not does_session_exist(session_id):
-        print(f"No user_id provided.")
+    if user_id is None:
+        print("Please provide a username.")
         return redirect(url_for("views.home"))
-
-    if not does_user_exist(user_id):
+    elif not does_user_exist(user_id):
         user = _create_user(user_id)
     else:
         user = get_user(user_id)
 
+    print("session", session_id)
     if not does_session_exist(session_id):
         print(f"Invalid session id: {session_id}.")
         flash(f"Invalid session id: {session_id}.")

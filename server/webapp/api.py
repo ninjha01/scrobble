@@ -16,6 +16,8 @@ from .models import (
     does_session_exist,
     create_session as _create_session,
     get_session,
+    add_user_word_to_round,
+    get_round,
 )
 
 
@@ -47,10 +49,10 @@ def create_user():
 @blueprint.route("/session/create", methods=["POST"])
 def create_session():
     req = request.get_json(force=True)
+    session_id = req.get("session_id", "")
 
-    if "session_id" not in req:
+    if len(session_id) == 0:
         return jsonify({"success": False, "error": "A session id must be provided."})
-    session_id = req["session_id"]
 
     if does_session_exist(session_id):
         return jsonify({"success": False, "error": "Session already exists."})
@@ -62,7 +64,7 @@ def create_session():
     # else:
     #     user = get_user(user_id)
 
-    num_rounds = req["num_rounds"]
+    num_rounds = int(req["num_rounds"])
     session = _create_session(session_id=session_id, num_rounds=num_rounds)
     return jsonify(
         {
@@ -70,6 +72,47 @@ def create_session():
             "session_url": url_for("views.view_session", session_id=session.id),
         }
     )
+
+
+@blueprint.route("/session/submit", methods=["POST"])
+def submit_to_session():
+    req = request.get_json(force=True)
+    session_id = req.get("session_id", None)
+
+    if session_id is None:
+        return jsonify({"success": False, "error": "A session id must be provided."})
+    elif not does_session_exist(session_id):
+        return jsonify(
+            {"success": False, "error": f"Session {session_id} doesn't exist."}
+        )
+    else:
+        session = get_session(session_id)
+
+    user_id = req.get("user_id", None)
+    if user_id is None:
+        return jsonify({"success": False, "error": "A user id must be provided."})
+    elif not does_user_exist(user_id):
+        return jsonify(
+            {"success": False, "error": f"Session {session_id} doesn't exist."}
+        )
+    else:
+        user = get_user(user_id)
+
+    round_id = req.get("round_id", None)
+    if round_id is None:
+        round_id = session.round_ids[session.current_round]
+    elif not does_round_exist(round_id):
+        return jsonify({"success": False, "error": f"Round {round_id} doesn't exist."})
+    round = get_round(round_id)
+    assert round is not None
+
+    user_word = req.get("user_word", "")
+
+    print(session_id, user_id, user_word)
+
+    add_user_word_to_round(round.id, user.id, user_word)
+    round = get_round(round_id)
+    return jsonify({"success": True, "user_words": round.user_words[user.id]})
 
 
 @blueprint.route("/session/create", methods=["POST"])

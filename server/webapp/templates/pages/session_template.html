@@ -1,7 +1,50 @@
 {% extends 'layouts/main.html' %}
 {% block title %}Session {{ session_id }}{% endblock %}
 {% block content %}
-  <h1> Session {{ session_id }} </h1>
+  <script>
+   function submit() {
+     let url = "{{ url_for("api.submit_to_session") }}"
+     let user = "{{ user_id }}"
+     let session_id = "{{ session_id }}"
+     let user_word = $("#submission-payload").val()
+     
+     let payload = {
+       session_id: session_id,
+       user_id: user,
+       user_word: user_word
+     }
+     fetch(url, {
+       credentials: "include",
+       method: "post",
+       body: JSON.stringify(payload)
+     }).then((response) => response.json()).then((data) => {
+       if (data.success === true) {
+	 $('.submissions').html("");
+	 $('.submission-header').removeAttr("hidden")
+	 $.each(data.user_words, function(index, value){
+	   console.log(index, value)
+	   $('.submissions').append('<li>' + value + '</li>');
+	 })
+       }
+       else {
+	 alert(data.error)
+       }
+     }).catch((error) => {
+       console.log(error)
+       alert("There was an internal error")
+     })
+   }
+  </script>
+  
+  <h1> Session: {{ session_id }} </h1>
+  <h2> User: {{ user_id }} </h2>
+  <h3> Round String: {{ round_str }} </h3>
 
-  <h2> User {{ user_id }} </h2>
+  <input id="submission-payload" style="text" placeholder="Write a submission...">
+  <button type="button" onClick="submit()">Submit</button>
+
+  <h3 class="submission-header" hidden> User Submissions </h3>
+  <ul class="submissions"></ul>
+
+  
 {% endblock %}
