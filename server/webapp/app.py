@@ -1,10 +1,12 @@
+import logging
+
 from flask import Flask
+from flask_humanize import Humanize
 from flask_login import LoginManager
-from .views import blueprint as views
+
 from .api import blueprint as api_blueprint
 from .auth import init_app as auth_init_app
-from flask_humanize import Humanize
-import logging
+from .views import blueprint as views
 
 
 def create_app(config={}):

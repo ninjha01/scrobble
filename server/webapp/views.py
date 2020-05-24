@@ -1,29 +1,20 @@
 from flask import (
-    render_template,
     Blueprint,
-    request,
-    redirect,
     flash,
-    url_for,
     get_flashed_messages,
+    redirect,
+    render_template,
+    request,
+    url_for,
 )
 from flask_login import login_required
-from .forms import LoginForm, RegisterForm, ForgotForm
-from .models import (
-    does_user_exist,
-    create_user as _create_user,
-    get_user,
-    does_session_exist,
-    create_session as _create_session,
-    get_session,
-)
+
+from .forms import ForgotForm, LoginForm, RegisterForm
+from .models import create_session as _create_session
+from .models import create_user as _create_user
+from .models import does_session_exist, does_user_exist, get_session, get_user
 
 blueprint = Blueprint("views", __name__)
-
-
-################
-#### routes ####
-################
 
 
 @blueprint.route("/")

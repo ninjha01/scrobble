@@ -1,10 +1,12 @@
-from uuid import uuid4
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import List, Tuple, Dict
+from typing import Dict, List, Tuple, DefaultDict
+from uuid import uuid4
+
+from flask_login import UserMixin
+
 from .db import DB
 from .utils import gen_round_str, pull_score_dict
-from flask_login import UserMixin
 
 db = DB()
 
@@ -64,7 +66,7 @@ def user_words_func():
 
 
 def create_round(session_id: str, number: int, word_length=10, round_str=None) -> Round:
-    user_words = defaultdict(user_words_func)
+    user_words: DefaultDict[str, List[str]] = defaultdict(user_words_func)
     if round_str is None:
         round_str = gen_round_str(word_length)
 
