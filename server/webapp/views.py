@@ -12,7 +12,13 @@ from flask_login import login_required
 from .forms import ForgotForm, LoginForm, RegisterForm
 from .models import create_session as _create_session
 from .models import create_user as _create_user
-from .models import does_session_exist, does_user_exist, get_session, get_user
+from .models import (
+    does_session_exist,
+    does_user_exist,
+    get_session,
+    get_user,
+    get_round,
+)
 
 blueprint = Blueprint("views", __name__)
 
@@ -35,16 +41,19 @@ def view_session(session_id):
         return redirect(url_for("views.home"))
     elif not does_user_exist(user_id):
         user = _create_user(user_id)
-    else:
-        user = get_user(user_id)
+    user = get_user(user_id)
 
-    print("session", session_id)
     if not does_session_exist(session_id):
         print(f"Invalid session id: {session_id}.")
         flash(f"Invalid session id: {session_id}.")
         return redirect(url_for("views.home"))
-    else:
-        session = get_session(session_id)
-        return render_template(
-            "pages/session_template.html", user_id=user.id, session_id=session.id
-        )
+    session = get_session(session_id)
+    round_num = session.current_round
+    round = get_round(session.round_ids[round_num])
+    return render_template(
+        "pages/session_template.html",
+        user_id=user.id,
+        session_id=session.id,
+        round_num=round_num,
+        round_str=round.round_str,
+    )

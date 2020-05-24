@@ -8,5 +8,5 @@ fi
 
 export FLASK_DEBUG=TRUE
 export FLASK_APP=main.py
-export GCS_ROOT_PATH='gs://flask-template/uploads'
+export GCS_ROOT_PATH='gs://scrobble/uploads'
 flask run 

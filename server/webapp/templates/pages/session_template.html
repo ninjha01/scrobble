@@ -1,13 +1,39 @@
-{% extends 'layouts/main.html' %}
-{% block title %}Session {{ session_id }}{% endblock %}
-{% block content %}
-  <script>
+{% extends 'layouts/main.html' %} {% block title %}Session {{ session_id }}{%
+endblock %} {% block content %}
+<script>
+   /* https://www.sitepoint.com/build-javascript-countdown-timer-no-dependencies/ */
+   function getTimeRemaining(){
+     /*      let endtime = "{{ round_end_time }}" */
+     let endtime = 'May 24 2020 16:00:00 GMT-0500';
+     var t = Date.parse(endtime) - Date.parse(new Date());
+     var seconds = Math.floor( (t/1000) % 60 );
+     var minutes = Math.floor( (t/1000/60) % 60 );
+     var hours = Math.floor( (t/(1000*60*60)) % 24 );
+     var days = Math.floor( t/(1000*60*60*24) );
+     return {
+       'minutes': minutes,
+       'seconds': seconds
+     };
+   }
+   function initializeClock(id){
+     var clock = document.getElementById(id);
+     var timeinterval = setInterval(function(){
+       var t = getTimeRemaining();
+       clock.innerHTML = 'minutes: ' + t.minutes + '<br>' +
+  	 'seconds: ' + t.seconds;
+       if(t.total<=0){
+  clearInterval(timeinterval);
+       }
+     },1000);
+   }
+   /* end https://www.sitepoint.com/build-javascript-countdown-timer-no-dependencies/  */
+
    function submit() {
      let url = "{{ url_for("api.submit_to_session") }}"
      let user = "{{ user_id }}"
      let session_id = "{{ session_id }}"
      let user_word = $("#submission-payload").val()
-     
+
      let payload = {
        session_id: session_id,
        user_id: user,
@@ -19,32 +45,37 @@
        body: JSON.stringify(payload)
      }).then((response) => response.json()).then((data) => {
        if (data.success === true) {
-	 $('.submissions').html("");
-	 $('.submission-header').removeAttr("hidden")
-	 $.each(data.user_words, function(index, value){
-	   console.log(index, value)
-	   $('.submissions').append('<li>' + value + '</li>');
-	 })
+  $('.submissions').html("");
+  $('.submission-header').removeAttr("hidden")
+  $.each(data.user_words, function(index, value){
+    console.log(index, value)
+    $('.submissions').append('<li>' + value + '</li>');
+  })
        }
        else {
-	 alert(data.error)
+  alert(data.error)
        }
      }).catch((error) => {
        console.log(error)
        alert("There was an internal error")
      })
    }
-  </script>
-  
-  <h1> Session: {{ session_id }} </h1>
-  <h2> User: {{ user_id }} </h2>
-  <h3> Round String: {{ round_str }} </h3>
+   initializeClock();
+</script>
 
-  <input id="submission-payload" style="text" placeholder="Write a submission...">
-  <button type="button" onClick="submit()">Submit</button>
+<h1>Session: {{ session_id }}</h1>
+<h2>User: {{ user_id }}</h2>
+<h3>Round [{{ round_num }}]: {{ round_str }}</h3>
+<div id="clockdiv"></div>
 
-  <h3 class="submission-header" hidden> User Submissions </h3>
-  <ul class="submissions"></ul>
+<input
+  id="submission-payload"
+  style="text"
+  placeholder="Write a submission..."
+/>
+<button type="button" onClick="submit()">Submit</button>
 
-  
+<h3 class="submission-header" hidden>User Submissions</h3>
+<ul class="submissions"></ul>
+
 {% endblock %}

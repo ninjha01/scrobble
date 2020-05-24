@@ -3,8 +3,6 @@ from dataclasses import dataclass
 from typing import Dict, List, Tuple, DefaultDict
 from uuid import uuid4
 
-from flask_login import UserMixin
-
 from .db import DB
 from .utils import gen_round_str, pull_score_dict
 
@@ -12,7 +10,7 @@ db = DB()
 
 
 @dataclass
-class User(UserMixin):
+class User:
     id: str
 
 
