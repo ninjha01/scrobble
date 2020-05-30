@@ -1,8 +1,8 @@
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import Dict, List, Tuple, DefaultDict
+from typing import Dict, List, Tuple, DefaultDict, Set, Optional
 from uuid import uuid4
-
+import datetime
 from .db import DB
 from .utils import gen_round_str, pull_score_dict
 
@@ -19,6 +19,8 @@ class UserDoesNotExist(Exception):
 
 
 def does_user_exist(user_id: str) -> bool:
+    if user_id is None or len(user_id) == 0:
+        return False
     return not db.get_user(user_id) is None
 
 
@@ -43,6 +45,7 @@ class Round:
     round_str: str
     user_words: Dict[str, List[str]]
     score_dict: Dict[str, int]
+    end_time: Optional[datetime.datetime]
 
     @property
     def id(self):
@@ -63,7 +66,9 @@ def user_words_func():
     return []
 
 
-def create_round(session_id: str, number: int, word_length=10, round_str=None) -> Round:
+def create_round(
+    session_id: str, number: int, word_length=10, round_str=None, end_time=None
+) -> Round:
     user_words: DefaultDict[str, List[str]] = defaultdict(user_words_func)
     if round_str is None:
         round_str = gen_round_str(word_length)
@@ -75,6 +80,7 @@ def create_round(session_id: str, number: int, word_length=10, round_str=None) -
         round_str=round_str,
         user_words=user_words,
         score_dict=score_dict,
+        end_time=end_time,
     )
     db.store_round(r)
     return r
@@ -99,12 +105,13 @@ def score_round(round_id) -> Dict[str, int]:
     scores = defaultdict(lambda: 0)
     for user_id, word_list in r.user_words.items():
         scores[user_id] = max([r.score_dict[w] for w in word_list])
-    return scores
+    return dict(scores)
 
 
 @dataclass
 class Session:
     id: str
+    users: Set[str]
     round_ids: List[str]
     current_round: str
 
@@ -114,13 +121,27 @@ class SessionDoesNotExist(Exception):
 
 
 def does_session_exist(session_id: str) -> bool:
-    if len(session_id) == 0:
+    if session_id is None:
         return False
+
     return not db.get_session(session_id) is None
 
 
+def add_user_to_session(user_id: str, session_id: str) -> Session:
+    u = get_user(user_id)
+    s = get_session(session_id)
+    s.users.add(u.id)
+    db.store_session(s)
+    return s
+
+
 def create_session(
-    session_id: str, num_rounds: int, current_round=0, rounds=None
+    session_id: str,
+    num_rounds: int,
+    current_round=0,
+    rounds=None,
+    start_time=None,
+    starting_user=None,
 ) -> Session:
     assert not does_session_exist(session_id)
     if rounds is None:
@@ -130,7 +151,12 @@ def create_session(
     else:
         assert num_rounds == len(rounds)
     round_ids = [r.id for r in rounds]
-    s = Session(id=session_id, round_ids=round_ids, current_round=current_round)
+    users = set()
+    if starting_user is not None:
+        users.add(get_user(starting_user).id)
+    s = Session(
+        id=session_id, round_ids=round_ids, current_round=current_round, users=users
+    )
     db.store_session(s)
     return s
 

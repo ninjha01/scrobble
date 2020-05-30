@@ -15,9 +15,12 @@ from .models import create_user as _create_user
 from .models import (
     does_session_exist,
     does_user_exist,
+    add_user_to_session,
     get_session,
     get_user,
     get_round,
+    # get_round_times,
+    score_round,
 )
 
 blueprint = Blueprint("views", __name__)
@@ -34,10 +37,43 @@ def about():
 
 
 @blueprint.route("/session/view/<session_id>", methods=["GET", "POST"])
-def view_session(session_id):
+@blueprint.route("/session/view/", methods=["GET", "POST"])
+def view_session(session_id=None):
+    user_id = request.form.get("user_id", None)
+    if user_id is None or len(user_id) == 0:
+        flash("Please provide a username.")
+        return redirect(url_for("views.home"))
+    elif not does_user_exist(user_id):
+        user = _create_user(user_id)
+    user = get_user(user_id)
+
+    if not does_session_exist(session_id):
+        flash(f"Invalid session id: {session_id}.")
+        return redirect(url_for("views.home"))
+    session = add_user_to_session(user.id, session_id)
+    round_num = session.current_round
+    current_round_id = session.round_ids[round_num]
+    score_dicts = [(r_id, score_round(r_id)) for r_id in session.round_ids]
+    score_dicts = [
+        sd if sd else f"No scores for round {r_id}" for r_id, sd in score_dicts
+    ]
+    # round_times = get_round_times(session_id)
+    return render_template(
+        "pages/session_template.html",
+        user_id=user.id,
+        session_id=session.id,
+        users=session.users,
+        current_round_number=round_num,
+        current_round_id=current_round_id,
+        score_dicts=score_dicts,
+    )
+
+
+@blueprint.route("/session/view/<session_id>/<round_id>", methods=["GET", "POST"])
+def view_round(session_id, round_id):
     user_id = request.form.get("user_id", None)
     if user_id is None:
-        print("Please provide a username.")
+        flash("Please provide a username.")
         return redirect(url_for("views.home"))
     elif not does_user_exist(user_id):
         user = _create_user(user_id)
@@ -51,7 +87,7 @@ def view_session(session_id):
     round_num = session.current_round
     round = get_round(session.round_ids[round_num])
     return render_template(
-        "pages/session_template.html",
+        "pages/round_template.html",
         user_id=user.id,
         session_id=session.id,
         round_num=round_num,

@@ -43,15 +43,18 @@ def create_session():
     if does_session_exist(session_id):
         return jsonify({"success": False, "error": "Session already exists."})
 
-    # user_id = req["user_id"]
-
-    # if not does_user_exist(user_id):
-    #     user = _create_user(user_id)
-    # else:
-    #     user = get_user(user_id)
+    user_id = req.get("user_id", None)
+    if user_id is None:
+        return jsonify({"success": False, "error": "A username must be provided."})
+    if not does_user_exist(user_id):
+        user = _create_user(user_id)
+    else:
+        user = get_user(user_id)
 
     num_rounds = int(req["num_rounds"])
-    session = _create_session(session_id=session_id, num_rounds=num_rounds)
+    session = _create_session(
+        session_id=session_id, num_rounds=num_rounds, starting_user=user.id
+    )
     return jsonify(
         {
             "success": True,
@@ -63,8 +66,8 @@ def create_session():
 @blueprint.route("/session/submit", methods=["POST"])
 def submit_to_session():
     req = request.get_json(force=True)
-    session_id = req.get("session_id", None)
 
+    session_id = req.get("session_id", None)
     if session_id is None:
         return jsonify({"success": False, "error": "A session id must be provided."})
     elif not does_session_exist(session_id):
@@ -92,15 +95,9 @@ def submit_to_session():
     round = get_round(round_id)
     assert round is not None
 
-    user_word = req.get("user_word", "")
-
-    print(session_id, user_id, user_word)
+    user_word = req.get(
+        "user_word", ""
+    )  # TODO: maybe should return error if no word submitted
 
     add_user_word_to_round(round.id, user.id, user_word)
-    round = get_round(round_id)
     return jsonify({"success": True, "user_words": round.user_words[user.id]})
-
-
-@blueprint.route("/session/create", methods=["POST"])
-def create_round():
-    pass
