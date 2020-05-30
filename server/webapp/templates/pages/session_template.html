@@ -23,17 +23,12 @@ endblock %} {% block content %}
    }
 </script>
 <h1>Session: {{ session_id }} | Playing as: {{ user_id }}</h1>
-<!-- <ul>
-  {% for r_id, start_time, end_time in round_times %}
-    <li>
-      <p> {{ r_id }} </p>
-      <button type="button" onClick="joinRound()">
-	Join Round {{ current_round_number }}
-      </button>
-      </p>
-    </li>
-  {% endfor %}
-       </ul> -->
+
+<div>
+  <p>Current Round: {{ current_round_id }}</p>
+  <button type="button" onClick="joinRound()">Start/Join Round</button>
+</div>
+
 <h2>Players:</h2>
 <ul>
   {% for u_id in users %}

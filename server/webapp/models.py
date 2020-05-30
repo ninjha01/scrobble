@@ -56,6 +56,10 @@ class RoundDoesNotExist(Exception):
     pass
 
 
+class RoundAlreadyStarted(Exception):
+    pass
+
+
 def does_round_exist(round_id: str) -> bool:
     return not db.get_round(round_id) is None
 
@@ -98,6 +102,18 @@ def get_round(round_id: str):
         return db.get_round(round_id)
     else:
         raise RoundDoesNotExist
+
+
+def start_round(round_id: str, round_duration=60, force=False) -> Round:
+    """
+    assumes round_duration is in seconds
+    """
+    r = get_round(round_id)
+    if not force and r.end_time is not None:
+        raise RoundAlreadyStarted
+    r.end_time = datetime.datetime.now() + datetime.timedelta(seconds=round_duration)
+    db.store_round(r)
+    return r
 
 
 def score_round(round_id) -> Dict[str, int]:
@@ -166,3 +182,27 @@ def get_session(session_id: str) -> Session:
         return db.get_session(session_id)
     else:
         raise SessionDoesNotExist
+
+
+def is_session_finished(session_id: str) -> bool:
+    s = get_session(session_id)
+    assert s.current_round <= len(s.round_ids)
+    return s.current_round == len(s.round_ids)
+
+
+def advance_round(session_id: str) -> Session:
+    s = get_session(session_id)
+    assert not is_session_finished(s.id)
+    s.current_round += 1
+    db.store_session(s)
+    return s
+
+
+def session_can_advance(session_id) -> bool:
+    s = get_session(session_id)
+    current_round = get_round(s.round_ids[s.current_round])
+    return (
+        current_round.end_time is not None
+        and not is_session_finished(s.id)
+        and datetime.datetime.now() > current_round.end_time
+    )

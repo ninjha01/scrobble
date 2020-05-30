@@ -3,9 +3,7 @@ endblock %} {% block content %}
 <script>
    /* https://www.sitepoint.com/build-javascript-countdown-timer-no-dependencies/ */
    function getTimeRemaining(){
-     /*      let start_time = {{ round_start_time }} */
-     /*      let endtime = "{{ round_end_time }}" */
-     let endtime = '2020-05-24T15:17:30-05:00'
+     let endtime = "{{ end_time }}"
      var t = Date.parse(endtime) - Date.parse(new Date());
      var seconds = Math.floor( (t/1000) % 60 );
      var minutes = Math.floor( (t/1000/60) % 60 );
@@ -26,20 +24,34 @@ endblock %} {% block content %}
        console.log(t)
 
        clock.innerHTML = 'minutes: ' + t.minutes + '<br>' +
-  	 'seconds: ' + t.seconds;
+  			 'seconds: ' + t.seconds;
        if(t.total <= 0){
-  console.log("cleared")
   clearInterval(timeinterval);
   alert("The round is over.")
-  goToScorePage()
+  returnToSession()
        }
      },1000);
    }
 
-   function goToScorePage() {
-
+   function returnToSession() {
+     let user = "{{ user_id }}"
+     let url = "{{ url_for("views.view_session", session_id=session_id) }}"
+     let payload = {
+       user_id: user,
+     }
+     // jquery extend redirect with post datafunction
+     $.extend(
+       {
+  redirectPost: function(location, args)  {
+    var form = '';
+    $.each( args, function( key, value ) {
+      form += '<input type="hidden" name="'+key+'" value="'+value+'">';
+    });
+    $('<form action="'+location+'" method="POST">'+form+'</form>').appendTo('body').submit();
+  }
+     });
+     $.redirectPost(url, payload)
    }
-   /* end https://www.sitepoint.com/build-javascript-countdown-timer-no-dependencies/  */
 
    function submit() {
      let url = "{{ url_for("api.submit_to_session") }}"
@@ -60,6 +72,7 @@ endblock %} {% block content %}
        if (data.success === true) {
   $('.submissions').html("");
   $('.submission-header').removeAttr("hidden")
+    $('.submissions').append('<li>' + user_word + '</li>');
   $.each(data.user_words, function(index, value){
     console.log(index, value)
     $('.submissions').append('<li>' + value + '</li>');
