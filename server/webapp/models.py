@@ -9,6 +9,16 @@ from .utils import gen_round_str, pull_score_dict
 from google.cloud.datastore.entity import Entity
 
 
+def get_all_of_entity_type(key_type) -> List[str]:
+    assert key_type in {User.key_type, Round.key_type, Session.key_type}
+    query = db.ds_client.query(kind=key_type)
+    results = list(query.fetch())
+    entity_names = [entity.key.name for entity in results]
+    for e in entity_names:
+        assert e is not None
+    return entity_names
+
+
 @dataclass
 class User:
     id: str
