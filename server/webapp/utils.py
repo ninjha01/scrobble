@@ -27,14 +27,14 @@ def pull_score_dict(round_str) -> Dict[str, int]:
 
     response = requests.get(url)
 
-    def parse_response(length_word_map):
+    def parse_response(response: requests.models.Response) -> Dict[str, int]:
         response_json = json.loads(response.content[19:])
         length_word_map = response_json["m"]
         word_length_dict: DefaultDict[str, int] = defaultdict(int)
         for length, words in length_word_map.items():
             for w in words.keys():
                 word_length_dict[w.lower()] = int(length)
-                return word_length_dict
+        return word_length_dict
 
     try:
         return parse_response(response)
