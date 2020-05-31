@@ -8,3 +8,4 @@ webapp/secret.yaml
 secret.yaml
 .mypy_cache/
 /server/*.db
+/server/scrobble-3f6552fc61a6.json

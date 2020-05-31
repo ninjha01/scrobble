@@ -1,11 +1,11 @@
 #!/bin/bash
 set +ex
 if [ ! -e secret.json ]; then
-    gsutil cp gs://flask_template_secrets/secret.json secret.json
+    gsutil cp gs://scrobble_secrets/secret.json secret.json
 fi
 
 if [ ! -e secret.yaml ]; then
-    gsutil cp gs://flask_template_secrets/secret.yaml secret.yaml
+    gsutil cp gs://scrobble_secrets/secret.yaml secret.yaml
 fi
 
-gcloud app deploy --project scrobble-267502
+gcloud app deploy --project scrobble

@@ -3,39 +3,56 @@ from dataclasses import dataclass
 from typing import Dict, List, Tuple, DefaultDict, Set, Optional
 from uuid import uuid4
 import datetime
-from .db import DB
+import pytz
+from .extensions import db
 from .utils import gen_round_str, pull_score_dict
-
-db = DB()
+from google.cloud.datastore.entity import Entity
 
 
 @dataclass
 class User:
     id: str
+    key_type = "User"
+
+    def to_entity(self) -> Entity:
+        key = db.ds_client.key(self.key_type, self.id)
+        entity = Entity(key=key)
+        return entity
+
+
+def entity_to_user(entity: Entity) -> Optional[User]:
+    if entity is None:
+        return None
+    return User(id=entity.key.id_or_name)
 
 
 class UserDoesNotExist(Exception):
     pass
 
 
+def get_user(user_id: str) -> Optional[User]:
+    user_key = db.ds_client.key(User.key_type, user_id)
+    user_entity = db.ds_client.get(user_key)
+    return entity_to_user(user_entity)
+
+
+def put_user(u: User):
+    assert u is not None
+    user_entity = u.to_entity()
+    db.ds_client.put(user_entity)
+
+
 def does_user_exist(user_id: str) -> bool:
     if user_id is None or len(user_id) == 0:
         return False
-    return not db.get_user(user_id) is None
+    return get_user(user_id) is not None
 
 
 def create_user(user_id: str) -> User:
     assert not does_user_exist(user_id)
     u = User(id=user_id)
-    db.store_user(u)
+    put_user(u)
     return u
-
-
-def get_user(user_id: str) -> User:
-    if does_user_exist(user_id):
-        return db.get_user(user_id)
-    else:
-        raise UserDoesNotExist
 
 
 @dataclass
@@ -45,11 +62,43 @@ class Round:
     round_str: str
     user_words: Dict[str, List[str]]
     score_dict: Dict[str, int]
-    end_time: Optional[datetime.datetime]
+    end_time: Optional[datetime.datetime] = None
+    key_type = "Round"
 
     @property
     def id(self):
         return f"<session: {self.session_id}, number: {self.number}>"
+
+    def to_entity(self) -> Entity:
+        key = db.ds_client.key(self.key_type, self.id)
+        entity = Entity(key=key)
+        entity["session_id"] = self.session_id
+        entity["number"] = self.number
+        entity["round_str"] = self.round_str
+        entity["user_words"] = self.user_words
+        entity["score_dict"] = self.score_dict
+        if self.end_time is not None:
+            entity["end_time"] = self.end_time.astimezone().isoformat()
+        else:
+            entity["end_time"] = None
+        return entity
+
+
+def entity_to_round(entity: Entity) -> Optional[Round]:
+    if entity is None:
+        return None
+    if entity["end_time"] is None:
+        end_time = None
+    else:
+        end_time = datetime.datetime.fromisoformat(entity["end_time"])
+    return Round(
+        session_id=entity["session_id"],
+        number=entity["number"],
+        round_str=entity["round_str"],
+        user_words=defaultdict(user_words_func, entity["user_words"]),
+        score_dict=defaultdict(int, entity["score_dict"],),
+        end_time=end_time,
+    )
 
 
 class RoundDoesNotExist(Exception):
@@ -60,8 +109,22 @@ class RoundAlreadyStarted(Exception):
     pass
 
 
+def get_round(round_id: str) -> Optional[Round]:
+    round_key = db.ds_client.key(Round.key_type, round_id)
+    round_entity = db.ds_client.get(round_key)
+    return entity_to_round(round_entity)
+
+
+def put_round(r: Round):
+    assert r is not None
+    round_entity = r.to_entity()
+    db.ds_client.put(round_entity)
+
+
 def does_round_exist(round_id: str) -> bool:
-    return not db.get_round(round_id) is None
+    if round_id is None or len(round_id) == 0:
+        return False
+    return get_round(round_id) is not None
 
 
 # https://stackoverflow.com/questions/16439301/cant-pickle-defaultdict
@@ -86,22 +149,17 @@ def create_round(
         score_dict=score_dict,
         end_time=end_time,
     )
-    db.store_round(r)
+    put_round(r)
     return r
 
 
 def add_user_word_to_round(round_id: str, user_id: str, word: str):
     r = get_round(round_id)
+    assert r is not None
     u = get_user(user_id)
+    assert u is not None
     r.user_words[u.id].append(word)
-    db.store_round(r)
-
-
-def get_round(round_id: str):
-    if does_round_exist(round_id):
-        return db.get_round(round_id)
-    else:
-        raise RoundDoesNotExist
+    put_round(r)
 
 
 def start_round(round_id: str, round_duration=60, force=False) -> Round:
@@ -109,15 +167,19 @@ def start_round(round_id: str, round_duration=60, force=False) -> Round:
     assumes round_duration is in seconds
     """
     r = get_round(round_id)
+    assert r is not None
     if not force and r.end_time is not None:
         raise RoundAlreadyStarted
-    r.end_time = datetime.datetime.now() + datetime.timedelta(seconds=round_duration)
-    db.store_round(r)
+    r.end_time = datetime.datetime.now(tz=pytz.utc) + datetime.timedelta(
+        seconds=round_duration
+    )
+    put_round(r)
     return r
 
 
 def score_round(round_id) -> Dict[str, int]:
     r = get_round(round_id)
+    assert r is not None
     scores = defaultdict(lambda: 0)
     for user_id, word_list in r.user_words.items():
         scores[user_id] = max([r.score_dict[w] for w in word_list])
@@ -129,25 +191,59 @@ class Session:
     id: str
     users: Set[str]
     round_ids: List[str]
-    current_round: str
+    current_round: int
+    key_type = "Session"
+
+    def to_entity(self) -> Entity:
+        key = db.ds_client.key(self.key_type, self.id)
+        entity = Entity(key=key)
+        entity["id"] = self.id
+        entity["users"] = list(self.users)
+        entity["round_ids"] = self.round_ids
+        entity["current_round"] = self.current_round
+        return entity
+
+
+def entity_to_session(entity: Entity) -> Optional[Session]:
+    if entity is None:
+        return None
+    return Session(
+        id=entity["id"],
+        users=set(entity["users"]),
+        round_ids=entity["round_ids"],
+        current_round=entity["current_round"],
+    )
 
 
 class SessionDoesNotExist(Exception):
     pass
 
 
-def does_session_exist(session_id: str) -> bool:
-    if session_id is None:
-        return False
+def get_session(session_id: str) -> Optional[Session]:
+    session_key = db.ds_client.key(Session.key_type, session_id)
+    session_entity = db.ds_client.get(session_key)
+    return entity_to_session(session_entity)
 
-    return not db.get_session(session_id) is None
+
+def put_session(r: Session):
+    assert r is not None
+    session_entity = r.to_entity()
+    db.ds_client.put(session_entity)
+
+
+def does_session_exist(session_id: str) -> bool:
+    if session_id is None or len(session_id) == 0:
+        return False
+    return get_session(session_id) is not None
 
 
 def add_user_to_session(user_id: str, session_id: str) -> Session:
     u = get_user(user_id)
+    assert u is not None
     s = get_session(session_id)
+    assert s is not None
     s.users.add(u.id)
-    db.store_session(s)
+    put_session(s)
     return s
 
 
@@ -157,7 +253,7 @@ def create_session(
     current_round=0,
     rounds=None,
     start_time=None,
-    starting_user=None,
+    starting_user_id=None,
 ) -> Session:
     assert not does_session_exist(session_id)
     if rounds is None:
@@ -168,41 +264,41 @@ def create_session(
         assert num_rounds == len(rounds)
     round_ids = [r.id for r in rounds]
     users = set()
-    if starting_user is not None:
-        users.add(get_user(starting_user).id)
+    if starting_user_id is not None:
+        starting_user = get_user(starting_user_id)
+        assert starting_user is not None
+        users.add(starting_user.id)
     s = Session(
         id=session_id, round_ids=round_ids, current_round=current_round, users=users
     )
-    db.store_session(s)
+    put_session(s)
     return s
-
-
-def get_session(session_id: str) -> Session:
-    if does_session_exist(session_id):
-        return db.get_session(session_id)
-    else:
-        raise SessionDoesNotExist
 
 
 def is_session_finished(session_id: str) -> bool:
     s = get_session(session_id)
+    assert s is not None
     assert s.current_round <= len(s.round_ids)
     return s.current_round == len(s.round_ids)
 
 
 def advance_round(session_id: str) -> Session:
     s = get_session(session_id)
+    assert s is not None
     assert not is_session_finished(s.id)
     s.current_round += 1
-    db.store_session(s)
+    put_session(s)
     return s
 
 
 def session_can_advance(session_id) -> bool:
     s = get_session(session_id)
+    assert s is not None
     current_round = get_round(s.round_ids[s.current_round])
+    assert current_round is not None
+    now = datetime.datetime.now(tz=pytz.utc)
     return (
         current_round.end_time is not None
         and not is_session_finished(s.id)
-        and datetime.datetime.now() > current_round.end_time
+        and now > current_round.end_time
     )

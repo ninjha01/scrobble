@@ -24,6 +24,7 @@ from .models import (
     advance_round,
     score_round,
 )
+from .utils import localize_tz
 
 blueprint = Blueprint("views", __name__)
 
@@ -95,11 +96,13 @@ def view_round(session_id, round_id):
     round = get_round(session.round_ids[round_num])
     if round.end_time is None:
         round = start_round(round.id)
+    localized_end_time = localize_tz(round.end_time)
+    print(localized_end_time)
     return render_template(
         "pages/round_template.html",
         user_id=user.id,
         session_id=session.id,
         round_num=round_num,
         round_str=round.round_str,
-        end_time=round.end_time,
+        end_time=localized_end_time,
     )

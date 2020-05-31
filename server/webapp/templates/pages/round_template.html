@@ -21,8 +21,6 @@ endblock %} {% block content %}
      var clock = document.getElementById(id);
      var timeinterval = setInterval(function(){
        var t = getTimeRemaining();
-       console.log(t)
-
        clock.innerHTML = 'minutes: ' + t.minutes + '<br>' +
   			 'seconds: ' + t.seconds;
        if(t.total <= 0){

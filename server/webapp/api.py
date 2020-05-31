@@ -53,7 +53,7 @@ def create_session():
 
     num_rounds = int(req["num_rounds"])
     session = _create_session(
-        session_id=session_id, num_rounds=num_rounds, starting_user=user.id
+        session_id=session_id, num_rounds=num_rounds, starting_user_id=user.id
     )
     return jsonify(
         {
