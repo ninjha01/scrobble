@@ -192,7 +192,7 @@ def score_round(round_id) -> Dict[str, int]:
     assert r is not None
     scores = defaultdict(lambda: 0)
     for user_id, word_list in r.user_words.items():
-        scores[user_id] = max([r.score_dict[w] for w in word_list])
+        scores[user_id] = max([r.score_dict[w.lower()] for w in word_list])
     return dict(scores)
 
 
