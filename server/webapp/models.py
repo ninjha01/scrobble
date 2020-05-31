@@ -304,6 +304,8 @@ def advance_round(session_id: str) -> Session:
 def session_can_advance(session_id) -> bool:
     s = get_session(session_id)
     assert s is not None
+    if s.current_round + 1 >= len(s.round_ids):
+        return False
     current_round = get_round(s.round_ids[s.current_round])
     assert current_round is not None
     now = datetime.datetime.now(tz=pytz.utc)

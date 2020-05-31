@@ -56,6 +56,8 @@ def view_session(session_id=None):
     session = add_user_to_session(user.id, session_id)
 
     round_num = session.current_round
+    if round_num > len(session.round_ids) - 1:
+        round_num = len(session.round_ids) - 1
     current_round = get_round(session.round_ids[round_num])
     if session_can_advance(session.id):
         session = advance_round(session.id)
