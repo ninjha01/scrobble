@@ -1,6 +1,6 @@
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import Dict, List, Tuple, DefaultDict, Set, Optional
+from typing import Dict, List, Tuple, DefaultDict, Set, Optional, Union
 from uuid import uuid4
 import datetime
 import pytz
@@ -9,7 +9,7 @@ from .utils import gen_round_str, pull_score_dict
 from google.cloud.datastore.entity import Entity
 
 
-def get_all_of_entity_type(key_type) -> List[str]:
+def get_all_of_entity_type(key_type: str) -> List[str]:
     assert key_type in {User.key_type, Round.key_type, Session.key_type}
     query = db.ds_client.query(kind=key_type)
     results = list(query.fetch())
@@ -321,3 +321,34 @@ def session_can_advance(session_id) -> bool:
         and not is_session_finished(s.id)
         and now > current_round.end_time
     )
+
+
+################################################################################
+# Danger
+################################################################################
+def nuke_user(u_id: str):
+    u = get_user(u_id)
+    assert u is not None
+    print(f"Deleting {u.id}")
+    db.ds_client.delete(u.to_entity().key)
+
+
+def nuke_round(r_id: str):
+    r = get_round(r_id)
+    assert r is not None
+    print(f"Deleting {r.id}")
+    db.ds_client.delete(r.to_entity().key)
+
+
+def nuke_session(s_id: str):
+    s = get_session(s_id)
+    assert s is not None
+    for r_id in s.round_ids:
+        nuke_round(r_id)
+    print(f"Deleting {s.id}")
+    db.ds_client.delete(s.to_entity().key)
+
+
+def nuke_all_sessions():
+    assert input("Are you sure you want to nuke all sessions? [yes/no]: ") == "yes"
+    [nuke_session(s.id) for s in get_all_of_entity_type(key_type=Session.key_type)]
