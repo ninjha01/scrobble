@@ -23,7 +23,7 @@ ctx = app.test_request_context()
 ctx.push()
 
 try:
-    get_user()  # noqa
+    get_user("")  # noqa
 except (NameError, ImportError):
     import server.webapp.models as models
     from server.webapp.models import *  # noqa

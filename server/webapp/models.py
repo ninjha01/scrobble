@@ -105,7 +105,7 @@ def entity_to_round(entity: Entity) -> Optional[Round]:
         session_id=entity["session_id"],
         number=entity["number"],
         round_str=entity["round_str"],
-        user_words=defaultdict(user_words_func, entity["user_words"]),
+        user_words=defaultdict(lambda: [], entity["user_words"]),
         score_dict=defaultdict(int, entity["score_dict"],),
         end_time=end_time,
     )
@@ -137,16 +137,10 @@ def does_round_exist(round_id: str) -> bool:
     return get_round(round_id) is not None
 
 
-# https://stackoverflow.com/questions/16439301/cant-pickle-defaultdict
-# Can't pickle lambdas
-def user_words_func():
-    return []
-
-
 def create_round(
     session_id: str, number: int, word_length=10, round_str=None, end_time=None
 ) -> Round:
-    user_words: DefaultDict[str, List[str]] = defaultdict(user_words_func)
+    user_words: DefaultDict[str, List[str]] = defaultdict(lambda: [])
     if round_str is None:
         round_str = gen_round_str(word_length)
 
@@ -190,7 +184,7 @@ def start_round(round_id: str, round_duration=60, force=False) -> Round:
 def score_round(round_id) -> Dict[str, Tuple[str, int]]:
     r = get_round(round_id)
     assert r is not None
-    scores: DefaultDict[str, Tuple[str, int]] = defaultdict(lambda x: (x, 0))
+    scores: DefaultDict[str, Tuple[str, int]] = defaultdict(lambda: ("", 0))
     for user_id, word_list in r.user_words.items():
         max_word, max_score = "", -1
         for w in word_list:
