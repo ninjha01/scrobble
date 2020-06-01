@@ -25,7 +25,7 @@ endblock %} {% block content %}
 <h1>Session: {{ session_id }} | Playing as: {{ user_id }}</h1>
 
 <div>
-  <p>Current Round: {{ current_round_id }}</p>
+  <p>Round: {{ current_round_number }} of {{ total_rounds }}</p>
   <button type="button" onClick="joinRound()">Start/Join Round</button>
 </div>
 
@@ -38,7 +38,8 @@ endblock %} {% block content %}
 <h3>Scoreboard</h3>
 <ul>
   {% for sd in score_dicts %}
-  <li>{{ sd }}</li>
+  <li>{{ loop.index }}. {{ sd }}</li>
   {% endfor %}
 </ul>
+
 {% endblock %}

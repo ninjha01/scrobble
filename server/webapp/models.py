@@ -193,7 +193,7 @@ def start_round(round_id: str, round_duration=60, force=False) -> Round:
 def score_round(round_id) -> Dict[str, Tuple[str, int]]:
     r = get_round(round_id)
     assert r is not None
-    assert round_is_over(r)
+    assert round_is_over(r.id)
     scores: DefaultDict[str, Tuple[str, int]] = defaultdict(lambda: ("", 0))
     for user_id, word_list in r.user_words.items():
         max_word, max_score = "", -1
@@ -224,6 +224,23 @@ class Session:
         entity["round_ids"] = self.round_ids
         entity["current_round"] = self.current_round
         return entity
+
+    def get_played_rounds(self):
+        rounds = [get_round(r_id) for r_id in self.round_ids]
+        assert all(rounds)
+        played_ids = [r.id for r in rounds if round_is_over(r.id)]
+        return played_ids
+
+    def get_unplayed_rounds(self):
+        rounds = [get_round(r_id) for r_id in self.round_ids]
+        assert all(rounds)
+        unplayed_ids = [r.id for r in rounds if round_is_over(r.id)]
+        return unplayed_ids
+
+    def get_rounds(self):
+        rounds = [get_round(r_id) for r_id in self.round_ids]
+        assert all(rounds)
+        return rounds
 
 
 def entity_to_session(entity: Entity) -> Optional[Session]:

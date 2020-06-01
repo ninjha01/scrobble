@@ -63,7 +63,7 @@ def view_session(session_id=None):
         session = advance_round(session.id)
         round_num = session.current_round
         current_round = get_round(session.round_ids[round_num])
-    score_dicts = [(r_id, score_round(r_id)) for r_id in session.round_ids]
+    score_dicts = [(r_id, score_round(r_id)) for r_id in session.get_played_rounds()]
     score_dicts = [
         sd if sd else f"No scores for round {r_id}" for r_id, sd in score_dicts
     ]
@@ -73,9 +73,10 @@ def view_session(session_id=None):
         user_id=user.id,
         session_id=session.id,
         users=session.users,
-        current_round_number=round_num,
+        current_round_number=round_num + 1,
         current_round_id=current_round.id,
         score_dicts=score_dicts,
+        total_rounds=len(session.round_ids),
     )
 
 
