@@ -137,6 +137,15 @@ def does_round_exist(round_id: str) -> bool:
     return get_round(round_id) is not None
 
 
+def round_is_over(round_id: str) -> bool:
+    r = get_round(round_id)
+    assert r is not None
+    now = datetime.datetime.now(tz=pytz.utc)
+    if r.end_time is None:
+        return False
+    return now > r.end_time
+
+
 def create_round(
     session_id: str, number: int, word_length=10, round_str=None, end_time=None
 ) -> Round:
@@ -184,6 +193,7 @@ def start_round(round_id: str, round_duration=60, force=False) -> Round:
 def score_round(round_id) -> Dict[str, Tuple[str, int]]:
     r = get_round(round_id)
     assert r is not None
+    assert round_is_over(r)
     scores: DefaultDict[str, Tuple[str, int]] = defaultdict(lambda: ("", 0))
     for user_id, word_list in r.user_words.items():
         max_word, max_score = "", -1
@@ -310,12 +320,7 @@ def session_can_advance(session_id) -> bool:
         return False
     current_round = get_round(s.round_ids[s.current_round])
     assert current_round is not None
-    now = datetime.datetime.now(tz=pytz.utc)
-    return (
-        current_round.end_time is not None
-        and not is_session_finished(s.id)
-        and now > current_round.end_time
-    )
+    return round_is_over(current_round.id) and not is_session_finished(s.id)
 
 
 ################################################################################
