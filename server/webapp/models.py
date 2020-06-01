@@ -190,7 +190,7 @@ def start_round(round_id: str, round_duration=60, force=False) -> Round:
 def score_round(round_id) -> Dict[str, Tuple[str, int]]:
     r = get_round(round_id)
     assert r is not None
-    scores: DefaultDict[str, int] = defaultdict(lambda: 0)
+    scores: DefaultDict[str, Tuple[str, int]] = defaultdict(lambda x: (x, 0))
     for user_id, word_list in r.user_words.items():
         max_word, max_score = "", -1
         for w in word_list:
@@ -199,6 +199,7 @@ def score_round(round_id) -> Dict[str, Tuple[str, int]]:
                 max_word = w
                 max_score = w_score
         scores[user_id] = (max_word, max_score)
+    scores["Best Word"] = ("hello", 1)
     return dict(scores)
 
 
