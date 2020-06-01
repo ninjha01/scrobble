@@ -20,15 +20,22 @@ send leaderboard to users
 
 ```
 cd server
-conda create -n scrobble python=3.6
+conda create -n scrobble python=3.7
 source activate scrobble
 pip install -r webapp/requirements.txt
-cd webapp
-flask run
+./start.sh
 ```
 
 ### Local Dev
 ```
-cd server/webapp
-./flask run
+cd server
+./start.sh
 ```
+
+
+### Deploy
+```
+cd server
+./deploy.sh
+```
+
