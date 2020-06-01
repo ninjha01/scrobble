@@ -193,7 +193,8 @@ def score_round(round_id) -> Dict[str, Tuple[str, int]]:
                 max_word = w
                 max_score = w_score
         scores[user_id] = (max_word, max_score)
-    scores["Best Word"] = ("hello", 1)
+    best_word = max(r.score_dict, key=r.score_dict.get)
+    scores["Best Word"] = (best_word, len(best_word))
     return dict(scores)
 
 
