@@ -23,6 +23,7 @@ from .models import (
     start_round,
     advance_round,
     score_round,
+    score_session,
 )
 from .utils import localize_tz
 
@@ -59,10 +60,20 @@ def view_session(session_id=None):
     if round_num > len(session.round_ids) - 1:
         round_num = len(session.round_ids) - 1
     current_round = get_round(session.round_ids[round_num])
-    if session_can_advance(session.id):
+    if not session_can_advance(session.id):
+        # All rounds are over
+        session_scores = score_session(session.id)
+        return render_template(
+            "pages/session_finished_template.html",
+            user_id=user.id,
+            session_id=session.id,
+            session_scores=session_scores,
+        )
+    else:
         session = advance_round(session.id)
         round_num = session.current_round
         current_round = get_round(session.round_ids[round_num])
+
     score_dicts = [(r_id, score_round(r_id)) for r_id in session.get_played_rounds()]
     score_dicts = [
         sd if sd else f"No scores for round {r_id}" for r_id, sd in score_dicts

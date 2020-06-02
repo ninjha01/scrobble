@@ -340,6 +340,24 @@ def session_can_advance(session_id) -> bool:
     return round_is_over(current_round.id) and not is_session_finished(s.id)
 
 
+def score_session(session_id: str) -> List[Tuple[str, int]]:
+    s = get_session(session_id)
+    assert s is not None
+    assert not session_can_advance(s.id)
+    user_scores: DefaultDict[str, int] = defaultdict(lambda: 0)
+    for r in [get_round(r_id) for r_id in s.round_ids]:
+        assert r is not None
+        assert round_is_over(r.id)
+        for user, word_score_tuple in score_round(r.id).items():
+            _, score = word_score_tuple
+            user_scores[user] += score
+    return sorted(
+        [(user, score) for user, score in user_scores.items()],
+        key=lambda x: x[1],
+        reverse=True,
+    )
+
+
 ################################################################################
 # Danger
 ################################################################################

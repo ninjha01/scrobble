@@ -1,0 +1,13 @@
+{% extends 'layouts/main.html' %} {% block title %} Session {{session_id}}{%
+endblock %} {% block content %}
+
+<h1>Session: {{ session_id }} | Playing as: {{ user_id }}</h1>
+
+<h2>Final Scores</h2>
+<ul>
+  {% for user, score in session_scores %}
+  <li>{{loop.index}}. {{ user }}: {{ score }}</li>
+  {% endfor %}
+</ul>
+
+{% endblock %}
