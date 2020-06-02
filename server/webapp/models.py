@@ -147,7 +147,7 @@ def round_is_over(round_id: str) -> bool:
 
 
 def create_round(
-    session_id: str, number: int, word_length=10, round_str=None, end_time=None
+    session_id: str, number: int, word_length=15, round_str=None, end_time=None
 ) -> Round:
     user_words: DefaultDict[str, List[str]] = defaultdict(lambda: [])
     if round_str is None:
@@ -333,11 +333,13 @@ def advance_round(session_id: str) -> Session:
 def session_can_advance(session_id) -> bool:
     s = get_session(session_id)
     assert s is not None
-    if s.current_round + 1 >= len(s.round_ids):
+    if s.current_round >= len(s.round_ids) - 1:
         return False
     current_round = get_round(s.round_ids[s.current_round])
     assert current_round is not None
-    return round_is_over(current_round.id) and not is_session_finished(s.id)
+    # if the first round or the current round is over
+    can_advance_to_next_round = s.current_round == 0 or round_is_over(current_round.id)
+    return can_advance_to_next_round and not is_session_finished(s.id)
 
 
 def score_session(session_id: str) -> List[Tuple[str, int]]:

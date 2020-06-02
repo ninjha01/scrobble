@@ -22,6 +22,7 @@ from .models import (
     get_round,
     start_round,
     advance_round,
+    round_is_over,
     score_round,
     score_session,
 )
@@ -57,23 +58,25 @@ def view_session(session_id=None):
     session = add_user_to_session(user.id, session_id)
 
     round_num = session.current_round
-    if round_num > len(session.round_ids) - 1:
-        round_num = len(session.round_ids) - 1
+    assert round_num <= len(session.round_ids) - 1
     current_round = get_round(session.round_ids[round_num])
-    if not session_can_advance(session.id):
-        # All rounds are over
-        session_scores = score_session(session.id)
-        return render_template(
-            "pages/session_finished_template.html",
-            user_id=user.id,
-            session_id=session.id,
-            session_scores=session_scores,
-        )
-    else:
-        session = advance_round(session.id)
-        round_num = session.current_round
-        current_round = get_round(session.round_ids[round_num])
 
+    if round_is_over(current_round.id):
+        if session_can_advance(session.id):
+            # Go to next round
+            session = advance_round(session.id)
+            assert round_num <= len(session.round_ids) - 1
+            round_num = session.current_round
+            current_round = get_round(session.round_ids[round_num])
+        else:
+            # All rounds are over
+            session_scores = score_session(session.id)
+            return render_template(
+                "pages/session_finished_template.html",
+                user_id=user.id,
+                session_id=session.id,
+                session_scores=session_scores,
+            )
     score_dicts = [(r_id, score_round(r_id)) for r_id in session.get_played_rounds()]
     score_dicts = [
         sd if sd else f"No scores for round {r_id}" for r_id, sd in score_dicts
@@ -84,7 +87,7 @@ def view_session(session_id=None):
         user_id=user.id,
         session_id=session.id,
         users=session.users,
-        current_round_number=round_num + 1,
+        current_round_number=round_num,
         current_round_id=current_round.id,
         score_dicts=score_dicts,
         total_rounds=len(session.round_ids),
