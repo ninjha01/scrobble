@@ -8,6 +8,8 @@ handlers:
 
 env_variables:
   GCS_ROOT_PATH: "gs://scrobble/uploads"
+  PUBSUB_TOPIC: scrobble
+
 
 includes:
   - secret.yaml

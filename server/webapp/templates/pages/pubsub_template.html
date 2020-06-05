@@ -1,0 +1,10 @@
+{% extends 'layouts/main.html' %}
+{% block title %} Session {{session_id}} {%endblock %}
+{% block content %}
+  <h1> Messages </h1>
+  <ul>
+  {% for m in messages %}
+    <li> {{ m }} </li>
+  {% endfor %}
+  </ul>
+{% endblock %}

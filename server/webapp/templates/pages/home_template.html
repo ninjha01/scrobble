@@ -1,7 +1,6 @@
-{% extends 'layouts/main.html' %}
-{% block title %}Home{% endblock %}
-{% block content %}
-  <script>
+{% extends 'layouts/main.html' %} {% block title %}Home{% endblock %} {% block
+content %}
+<script>
    function createSession() {
      let url = "{{ url_for("api.create_session") }}"
      let starting_user = $("#user-payload").val()
@@ -32,7 +31,7 @@
    }
 
 
-    function joinSession(user, session_id) {
+   function joinSession(user, session_id) {
      if (user === null) {
        user = $("#user-payload").val()
      }
@@ -48,11 +47,11 @@
        {
   redirectPost: function(location, args)
   {
-           var form = '';
-           $.each( args, function( key, value ) {
-             form += '<input type="hidden" name="'+key+'" value="'+value+'">';
-           });
-           $('<form action="'+location+'" method="POST">'+form+'</form>').appendTo('body').submit();
+    var form = '';
+    $.each( args, function( key, value ) {
+      form += '<input type="hidden" name="'+key+'" value="'+value+'">';
+    });
+    $('<form action="'+location+'" method="POST">'+form+'</form>').appendTo('body').submit();
   }
      });
      $.redirectPost(url, payload)

@@ -7,7 +7,7 @@ sys.path.insert(0, "~/Desktop/scrobble/")
 from server.webapp.app import create_app  # noqa
 
 
-key_path = "./server/scrobble-3f6552fc61a6.json"
+key_path = "./server/secret.json"
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = key_path
 assert os.path.exists(key_path)
 credentials = service_account.Credentials.from_service_account_file(key_path)

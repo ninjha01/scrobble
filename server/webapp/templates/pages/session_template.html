@@ -1,6 +1,6 @@
-{% extends 'layouts/main.html' %} {% block title %} Session {{session_id}}{%
-endblock %} {% block content %}
-
+{% extends 'layouts/main.html' %}
+{% block title %} Session {{session_id}} {%endblock %}
+{% block content %}
 <script>
    function joinRound() {
      let user = "{{ user_id }}"
@@ -21,7 +21,31 @@ endblock %} {% block content %}
      });
      $.redirectPost(url, payload)
    }
+   function sse() {
+     let source = new EventSource("{{ url_for('pubsub.push') }}");
+     let out = document.querySelector("#out")
+     source.onmessage = function(e) {
+       out.innerHTML = e.data + '\n' + out.innerHTML;
+     };
+   }
+   function attach_keyup() {
+     $('#in').keyup(function(e){
+       if (e.keyCode == 13) {
+  $.post('/post', {'message': $(this).val()});
+  $(this).val('');
+       }
+     });
+   }
+   window.onload = function () {
+     sse();
+     attach_keyup();
+   }
 </script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+<h1>Chat</h1>
+<p>Message: <input id="in" /></p>
+<pre id="out"></pre>
+
 <h1>Session: {{ session_id }} | Playing as: {{ user_id }}</h1>
 
 <div>
@@ -41,5 +65,4 @@ endblock %} {% block content %}
   <li>{{ loop.index }}. {{ sd }}</li>
   {% endfor %}
 </ul>
-
 {% endblock %}
