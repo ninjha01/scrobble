@@ -1,6 +1,7 @@
-{% extends 'layouts/main.html' %} {% block title %}Home{% endblock %} {% block
-content %}
-<script>
+{% extends 'layouts/main.html' %}
+{% block title %}Home{% endblock %}
+{% block content %}
+  <script>
    function createSession() {
      let url = "{{ url_for("api.create_session") }}"
      let starting_user = $("#user-payload").val()
@@ -18,11 +19,11 @@ content %}
        body: JSON.stringify(payload)
      }).then((response) => response.json()).then((data) => {
        if (data.success === true) {
-  alert("Successfully created session: " + session_id + ".")
-  joinSession(starting_user, session_id);
+	 alert("Successfully created session: " + session_id + ".")
+	 joinSession(starting_user, session_id);
        }
        else {
-  alert(data.error)
+	 alert(data.error)
        }
      }).catch((error) => {
        console.log(error)
@@ -45,61 +46,61 @@ content %}
      // jquery extend redirect with post datafunction
      $.extend(
        {
-  redirectPost: function(location, args)
-  {
-    var form = '';
-    $.each( args, function( key, value ) {
-      form += '<input type="hidden" name="'+key+'" value="'+value+'">';
-    });
-    $('<form action="'+location+'" method="POST">'+form+'</form>').appendTo('body').submit();
-  }
+	 redirectPost: function(location, args)
+	 {
+	   var form = '';
+	   $.each( args, function( key, value ) {
+	     form += '<input type="hidden" name="'+key+'" value="'+value+'">';
+	   });
+	   $('<form action="'+location+'" method="POST">'+form+'</form>').appendTo('body').submit();
+	 }
      });
      $.redirectPost(url, payload)
    }
-</script>
+  </script>
 
-<div class="page-header">
-  <h1>Play Scrobble!</h1>
-  <h3>1. Pick a username</h3>
-  <ul>
-    <li>
-      <input id="user-payload" style="text" placeholder="Username" />
-    </li>
-  </ul>
-  <h3>2. Create or join a session</h3>
-  <h4>Join</h4>
-  <ul>
-    <li>
-      <input
-        id="join-session-id-payload"
-        style="text"
-        placeholder="Session name"
-      />
-    </li>
-    <li>
-      <button type="button" onClick="joinSession(null, null)">Join</button>
-    </li>
-  </ul>
-  <h4>Create</h4>
-  <ul>
-    <li>
-      <input
-        id="create-session-id-payload"
-        style="text"
-        placeholder="Session name"
-      />
-    </li>
-    <li>
-      <input
-        id="create-session-rounds-payload"
-        type="number"
-        placeholder="Number of Rounds"
-      />
-    </li>
-    <li>
-      <button type="button" onClick="createSession()">Create</button>
-    </li>
-  </ul>
-</div>
+  <div class="page-header">
+    <h1>Play Scrobble!</h1>
+    <h3>1. Pick a username</h3>
+    <ul>
+      <li>
+	<input id="user-payload" style="text" placeholder="Username" />
+      </li>
+    </ul>
+    <h3>2. Create or join a session</h3>
+    <h4>Join</h4>
+    <ul>
+      <li>
+	<input
+          id="join-session-id-payload"
+          style="text"
+          placeholder="Session name"
+	/>
+      </li>
+      <li>
+	<button type="button" onClick="joinSession(null, null)">Join</button>
+      </li>
+    </ul>
+    <h4>Create</h4>
+    <ul>
+      <li>
+	<input
+          id="create-session-id-payload"
+          style="text"
+          placeholder="Session name"
+	/>
+      </li>
+      <li>
+	<input
+          id="create-session-rounds-payload"
+          type="number"
+          placeholder="Number of Rounds"
+	/>
+      </li>
+      <li>
+	<button type="button" onClick="createSession()">Create</button>
+      </li>
+    </ul>
+  </div>
 
 {% endblock %}

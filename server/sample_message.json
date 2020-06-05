@@ -1,0 +1,10 @@
+{
+    "message": {
+        "data": {
+            "round_id": "<session:hello,number:0>",
+            "session_id": "hello",
+            "user_id": "nishant",
+        },
+        "msg_type": "SESSION_START",
+    }
+}

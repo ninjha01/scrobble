@@ -1,7 +1,7 @@
 {% extends 'layouts/main.html' %}
 {% block title %} Session {{session_id}} {%endblock %}
 {% block content %}
-<script>
+  <script>
    function joinRound() {
      let user = "{{ user_id }}"
      let url = "{{ url_for("views.view_round", session_id=session_id, round_id=current_round_id) }}"
@@ -11,58 +11,74 @@
      // jquery extend redirect with post datafunction
      $.extend(
        {
-  redirectPost: function(location, args)  {
-    var form = '';
-    $.each( args, function( key, value ) {
-      form += '<input type="hidden" name="'+key+'" value="'+value+'">';
-    });
-    $('<form action="'+location+'" method="POST">'+form+'</form>').appendTo('body').submit();
-  }
+	 redirectPost: function(location, args)  {
+	   var form = '';
+	   $.each( args, function( key, value ) {
+	     form += '<input type="hidden" name="'+key+'" value="'+value+'">';
+	   });
+	   $('<form action="'+location+'" method="POST">'+form+'</form>').appendTo('body').submit();
+	 }
      });
      $.redirectPost(url, payload)
    }
-   function sse() {
-     let source = new EventSource("{{ url_for('pubsub.push') }}");
-     let out = document.querySelector("#out")
-     source.onmessage = function(e) {
-       out.innerHTML = e.data + '\n' + out.innerHTML;
-     };
-   }
-   function attach_keyup() {
-     $('#in').keyup(function(e){
-       if (e.keyCode == 13) {
-  $.post('/post', {'message': $(this).val()});
-  $(this).val('');
+   
+   function sendStartMsg() {
+     let user = "{{ user_id }}"
+     let url = "{{ url_for("pubsub.start_next_round", session_id=session_id) }}"
+     let payload = {
+       user_id: user,
+     }
+     fetch(url, {
+       credentials: "include",
+       method: "post",
+       body: JSON.stringify(payload)
+     }).then((response) => response.json()).then((data) => {
+       if (data.success === true) {
+	 console.log("Success")
        }
-     });
+       else {
+	 alert(data.error)
+       }
+     }).catch((error) => {
+       console.log(error)
+       alert("There was an internal error")
+     })
    }
-   window.onload = function () {
-     sse();
-     attach_keyup();
+   function startMsgListener() {
+     let source = new EventSource("{{ url_for('pubsub.stream', session_id=session_id) }}");
+     let out = document.querySelector("#out")
+     source.onmessage = function(msg) {
+       let envelope = JSON.parse(msg.data)
+       if (envelope.data.session_id == "{{ session_id }}") {
+	 if (envelope.msg_type == "SESSION_START") {
+	   joinRound()
+	 }
+       }
+     }
    }
-</script>
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-<h1>Chat</h1>
-<p>Message: <input id="in" /></p>
-<pre id="out"></pre>
+   startMsgListener()
 
-<h1>Session: {{ session_id }} | Playing as: {{ user_id }}</h1>
+  </script>
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
 
-<div>
-  <p>Round: {{ current_round_number }} of {{ total_rounds }}</p>
-  <button type="button" onClick="joinRound()">Start/Join Round</button>
-</div>
+  <pre id="out"></pre>
+  <h1>Session: {{ session_id }} | Playing as: {{ user_id }}</h1>
 
-<h2>Players:</h2>
-<ul>
-  {% for u_id in users %}
-  <li>{{ u_id}}</li>
-  {% endfor %}
-</ul>
-<h3>Scoreboard</h3>
-<ul>
-  {% for sd in score_dicts %}
-  <li>{{ loop.index }}. {{ sd }}</li>
-  {% endfor %}
-</ul>
+  <div>
+    <p>Round: {{ current_round_number }} of {{ total_rounds }}</p>
+    <button type="button" onClick="sendStartMsg()">Start/Join Round</button>
+  </div>
+
+  <h2>Players:</h2>
+  <ul>
+    {% for u_id in users %}
+      <li>{{ u_id}}</li>
+    {% endfor %}
+  </ul>
+  <h3>Scoreboard</h3>
+  <ul>
+    {% for sd in score_dicts %}
+      <li>{{ loop.index }}. {{ sd }}</li>
+    {% endfor %}
+  </ul>
 {% endblock %}
