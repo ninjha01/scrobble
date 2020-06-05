@@ -34,7 +34,7 @@ google-cloud-pubsub==1.5.0
 googleapis-common-protos==1.51.0
 grpc-google-iam-v1==0.12.3
 grpcio==1.26.0
-httplib2==0.17.0
+httplib2==0.18.0
 humanize==0.5.1
 identify==1.4.11
 idna==2.5
