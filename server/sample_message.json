@@ -1,10 +1,6 @@
 {
     "message": {
-        "data": {
-            "round_id": "<session:hello,number:0>",
-            "session_id": "hello",
-            "user_id": "nishant",
-        },
+        "data": "eyJkYXRhIjogeyJyb3VuZF9pZCI6ICI8c2Vzc2lvbjogaGVsbG8sIG51bWJlcjogMD4iLCAic2Vzc2lvbl9pZCI6ICJoZWxsbyIsICJ1c2VyX2lkIjogIm5pc2hhbnQifSwgIm1zZ190eXBlIjogIlNFU1NJT05fU1RBUlQifQ==",
         "msg_type": "SESSION_START",
     }
 }

@@ -40,10 +40,7 @@ class Message:
 
 
 def dict_to_message(d: Dict[Any, Any]) -> Optional[Message]:
-    try:
-        return Message(msg_type=d["msg_type"], data=d["data"])
-    except KeyError:
-        return None
+    return Message(msg_type=d["msg_type"], data=d["data"])
 
 
 MESSAGES: List[Message] = []
@@ -103,11 +100,24 @@ def listen():
         return "Invalid request", 400
 
     envelope = json.loads(request.data.decode("utf-8"))
-    payload = envelope["message"]
-    message = dict_to_message(payload)
-    assert message is not None, payload
-    MESSAGES.append(message)
-    print(f"{payload} acked")
+    print("pubsub.listen", "envelope", envelope)
+    try:
+        # prod
+        print("pubsub.listen", "Am I in prod?")
+        payload = base64.b64decode(envelope["message"]["data"])
+    except TypeError:
+        # dev
+        print("pubsub.listen", "Am I in dev?")
+        payload = envelope["message"]["data"]
+    print("pubsub.listen", "payload type", type(payload))
+    try:
+        message = dict_to_message(json.loads(payload))
+        if message is not None:
+            print("pubsub.listen", f"Understood {payload}")
+            MESSAGES.append(message)
+    except (TypeError, KeyError) as e:
+        print("pubsub.listen", f"Didn't understand {payload}", e)
+    print("pubsub.listen", f"{payload} acked")
     return Response(status=200)
 
 

@@ -50,7 +50,8 @@
      source.onmessage = function(msg) {
        let envelope = JSON.parse(msg.data)
        if (envelope.data.session_id == "{{ session_id }}") {
-	 if (envelope.msg_type == "SESSION_START") {
+	 console.log(envelope.data.round_id)
+	 if (envelope.msg_type === "SESSION_START" && envelope.data.round_id === "{{ current_round_id|safe }}") {
 	   joinRound()
 	 }
        }
@@ -60,8 +61,6 @@
 
   </script>
   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-
-  <pre id="out"></pre>
   <h1>Session: {{ session_id }} | Playing as: {{ user_id }}</h1>
 
   <div>
