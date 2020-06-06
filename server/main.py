@@ -2,6 +2,8 @@ import os
 
 import yaml
 from google.oauth2 import service_account
+from google.cloud import pubsub_v1
+
 
 try:
     from webapp.app import create_app
@@ -27,3 +29,4 @@ if os.environ.get("DEV_OVERRIDE_USER"):
     config["DEV_OVERRIDE_USER"] = os.environ["DEV_OVERRIDE_USER"]
 
 app = create_app(config)
+app.publisher = pubsub_v1.PublisherClient()

@@ -13,7 +13,6 @@ from flask import (
 )
 import json
 import base64
-from google.cloud import pubsub_v1
 from typing import Iterator, Dict, Any, Optional, List
 from .models import (
     does_session_exist,
@@ -27,7 +26,9 @@ from .models import (
 
 blueprint = Blueprint("pubsub", __name__)
 
-publisher = pubsub_v1.PublisherClient()
+
+def get_publisher():
+    return current_app.publisher
 
 
 @dataclass
@@ -49,6 +50,7 @@ MESSAGES: List[Message] = []
 def publish(message: bytes, topic=None):
     project = current_app.config["PROJECT"]
     topic = topic if topic else current_app.config["PUBSUB_TOPIC"]
+    publisher = get_publisher()
     topic_path = publisher.topic_path(project, topic)
     publisher.publish(topic_path, data=message)
     print(f"Published: {str(message)}")

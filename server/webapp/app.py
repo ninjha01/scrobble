@@ -15,6 +15,7 @@ def create_app(config={}):
     app.register_blueprint(views_blueprint)
     app.register_blueprint(api_blueprint)
     app.register_blueprint(pubsub_blueprint)
+
     Humanize(app)
     # auth_init_app(app)
     app.logger.setLevel(logging.INFO)
