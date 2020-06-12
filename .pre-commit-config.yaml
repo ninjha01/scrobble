@@ -8,3 +8,8 @@ repos:
     rev: v1.2.3
     hooks:
       - id: flake8
+  - repo: https://github.com/prettier/prettier
+    rev: "" # Use the sha or tag you want to point at
+    hooks:
+      - id: prettier
+        exclude: server/*
