@@ -1,0 +1,2 @@
+* Created via 
+yarn create react-app frontend --template typescript
